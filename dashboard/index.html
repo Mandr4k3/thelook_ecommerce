@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>thelook Ecommerce Retention Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --ink: #182432;
+      --slate: #32455b;
+      --mist: #dce6ef;
+      --paper: #f6f1e7;
+      --card: rgba(255, 252, 247, 0.78);
+      --card-strong: rgba(255, 252, 247, 0.92);
+      --line: rgba(24, 36, 50, 0.12);
+      --teal: #1c8c82;
+      --teal-soft: #6cc5b8;
+      --gold: #f0a33b;
+      --coral: #d76347;
+      --navy: #103b5b;
+      --shadow: 0 18px 48px rgba(24, 36, 50, 0.12);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "IBM Plex Sans", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(28, 140, 130, 0.16), transparent 30%),
+        radial-gradient(circle at top right, rgba(240, 163, 59, 0.14), transparent 28%),
+        linear-gradient(180deg, #fffdf7 0%, #f4ecdf 100%);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(16, 59, 91, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 59, 91, 0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 24px 20px 56px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 16px;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 999px;
+      background: rgba(255, 252, 247, 0.82);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--navy), var(--teal));
+      color: #fff;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0.04em;
+    }
+
+    .brand-copy h1 {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 16px;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-copy p {
+      margin: 2px 0 0;
+      color: var(--slate);
+      font-size: 12px;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--slate);
+      transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .nav-links a:hover {
+      background: rgba(16, 59, 91, 0.08);
+      color: var(--ink);
+      transform: translateY(-1px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.95fr);
+      gap: 22px;
+      margin-bottom: 24px;
+    }
+
+    .hero-copy,
+    .hero-side,
+    .section-card,
+    .plot-shell,
+    .note-card,
+    .definition-card,
+    .footer-card {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--radius);
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-copy {
+      padding: 34px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-copy::after {
+      content: "";
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      border-radius: 999px;
+      right: -140px;
+      top: -90px;
+      background: radial-gradient(circle, rgba(28, 140, 130, 0.18), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(16, 59, 91, 0.08);
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero h2 {
+      margin: 16px 0 12px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(32px, 4vw, 58px);
+      line-height: 0.98;
+      max-width: 11ch;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--slate);
+      font-size: 17px;
+      line-height: 1.65;
+      max-width: 65ch;
+    }
+
+    .hero-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .chip {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(28, 140, 130, 0.09);
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .hero-side {
+      padding: 24px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .hero-side h3,
+    .section-head h3,
+    .note-card h3,
+    .definition-card h3,
+    .footer-card h3 {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 18px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: var(--card-strong);
+      border: 1px solid var(--line);
+    }
+
+    .stat-card strong {
+      display: block;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 28px;
+      line-height: 1.05;
+      margin-bottom: 6px;
+    }
+
+    .stat-card span {
+      display: block;
+      font-size: 12px;
+      color: var(--slate);
+      line-height: 1.45;
+    }
+
+    main {
+      display: grid;
+      gap: 22px;
+    }
+
+    .section-card {
+      padding: 28px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .section-head p {
+      margin: 8px 0 0;
+      color: var(--slate);
+      line-height: 1.6;
+      max-width: 68ch;
+    }
+
+    .section-tag {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--navy);
+    }
+
+    .plot-shell {
+      padding: 12px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid var(--line);
+    }
+
+    .plot {
+      min-height: 420px;
+    }
+
+    .plot-short {
+      min-height: 360px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+      gap: 18px;
+    }
+
+    .two-plots {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .note-card,
+    .definition-card,
+    .footer-card {
+      padding: 22px;
+      background: var(--card-strong);
+      border: 1px solid var(--line);
+    }
+
+    .note-card p,
+    .definition-card p,
+    .footer-card p,
+    .footer-card li,
+    .note-card li {
+      color: var(--slate);
+      line-height: 1.62;
+      margin: 0;
+    }
+
+    .flat-list {
+      display: grid;
+      gap: 12px;
+      margin: 16px 0 0;
+      padding-left: 18px;
+    }
+
+    .baseline-grid,
+    .experiment-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .baseline-tile,
+    .experiment-step {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(16, 59, 91, 0.05);
+      border: 1px solid rgba(16, 59, 91, 0.08);
+    }
+
+    .baseline-tile small,
+    .experiment-step small {
+      display: block;
+      color: var(--slate);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .baseline-tile strong,
+    .experiment-step strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .callout {
+      display: grid;
+      gap: 16px;
+    }
+
+    details {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    details + details {
+      margin-top: 14px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+      list-style: none;
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::before {
+      content: "+";
+      display: inline-block;
+      width: 18px;
+      color: var(--teal);
+    }
+
+    details[open] summary::before {
+      content: "−";
+    }
+
+    .footer-card ul {
+      margin: 14px 0 0;
+      padding-left: 18px;
+    }
+
+    .muted {
+      color: var(--slate);
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .two-col,
+      .two-plots {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .shell {
+        padding: 16px 14px 40px;
+      }
+
+      .topbar {
+        border-radius: 28px;
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+
+      .hero-copy,
+      .hero-side,
+      .section-card {
+        padding: 20px;
+      }
+
+      .stat-grid,
+      .baseline-grid,
+      .experiment-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">TL</div>
+        <div class="brand-copy">
+          <h1>thelook Ecommerce</h1>
+          <p>Retention, churn, and free-shipping opportunity dashboard</p>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="#mix">Revenue Mix</a>
+        <a href="#churn">Churn</a>
+        <a href="#segments">Segments</a>
+        <a href="#experiment">Experiment</a>
+        <a href="#definitions">Definitions</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Static GitHub Pages Dashboard</div>
+        <h2>Retention is improving, but revenue is still acquisition-led.</h2>
+        <p>
+          This dashboard rebuilds the Part 1 business logic on top of the local parquet extracts, then hardcodes the outputs for GitHub Pages.
+          The core signal is consistent across views: returning revenue share is climbing, but the business still looks like a one-and-done acquisition engine rather than a healthy repeat-purchase loop.
+        </p>
+        <div class="hero-chips">
+          <span class="chip" id="chip-coverage"></span>
+          <span class="chip" id="chip-churn-window"></span>
+          <span class="chip" id="chip-segment-snapshot"></span>
+        </div>
+      </div>
+      <aside class="hero-side">
+        <h3>Executive Snapshot</h3>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <strong id="stat-revenue"></strong>
+            <span>Completed revenue since January 2020</span>
+          </div>
+          <div class="stat-card">
+            <strong id="stat-returning"></strong>
+            <span>Average returning revenue share in the latest 12 full months</span>
+          </div>
+          <div class="stat-card">
+            <strong id="stat-churn"></strong>
+            <span>Average 90-day churn since January 2020 under the Part 1 definition</span>
+          </div>
+          <div class="stat-card">
+            <strong id="stat-customers"></strong>
+            <span>Purchasing customers in the March 31, 2026 segment snapshot</span>
+          </div>
+          <div class="stat-card">
+            <strong id="stat-correlation"></strong>
+            <span>Correlation between monthly revenue and 90-day churn</span>
+          </div>
+          <div class="stat-card">
+            <strong id="stat-threshold"></strong>
+            <span>Last-12-month completed orders already landing in the $75 to $99 band</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <main>
+      <section class="section-card" id="mix">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">Visual 1</div>
+            <h3>New vs Returning Revenue Mix by Month</h3>
+            <p>
+              Returning revenue is growing, but it still trails acquisition materially. This is the most important leadership signal because it says topline growth depends heavily on filling the funnel every month.
+            </p>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="plot-shell">
+            <div class="plot" id="mixPlot"></div>
+          </div>
+          <div class="note-card">
+            <h3>What Matters</h3>
+            <ul class="flat-list">
+              <li><span id="mix-insight-1"></span></li>
+              <li><span id="mix-insight-2"></span></li>
+              <li><span id="mix-insight-3"></span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" id="churn">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">Visual 2</div>
+            <h3>Monthly Churn Rate vs Revenue</h3>
+            <p>
+              The churn metric is intentionally strict: a customer is churned for a month if they place no completed order in the next 90 days after their last order in that month.
+              Even with that caveat, the direction is clear: months with lower churn are the months that monetize best.
+            </p>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="plot-shell">
+            <div class="plot" id="churnPlot"></div>
+          </div>
+          <div class="note-card">
+            <h3>Leadership Readout</h3>
+            <ul class="flat-list">
+              <li><span id="churn-insight-1"></span></li>
+              <li><span id="churn-insight-2"></span></li>
+              <li><span id="churn-insight-3"></span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" id="segments">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">Visual 3</div>
+            <h3>Customer Segment Split</h3>
+            <p>
+              I used a lightweight RFM-style segmentation at the March 31, 2026 snapshot date. The split is designed to be operationally useful: recency isolates reactivation risk, while order count and lifetime spend isolate the small high-value base worth protecting.
+            </p>
+          </div>
+        </div>
+        <div class="two-plots">
+          <div class="plot-shell">
+            <div class="plot-short" id="segmentSharePlot"></div>
+          </div>
+          <div class="plot-shell">
+            <div class="plot-short" id="segmentRevenuePlot"></div>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top: 18px;">
+          <div class="note-card">
+            <h3>How to Prioritize</h3>
+            <ul class="flat-list">
+              <li><span id="segment-insight-1"></span></li>
+              <li><span id="segment-insight-2"></span></li>
+              <li><span id="segment-insight-3"></span></li>
+            </ul>
+          </div>
+          <div class="note-card">
+            <h3>Suggested Program Order</h3>
+            <ul class="flat-list">
+              <li>Protect <strong>Active repeat</strong> and <strong>Champions</strong> first. They are small in count but economically dense.</li>
+              <li>Run reactivation programs on the <strong>At risk</strong> base second because the recency window is still recoverable.</li>
+              <li>Redesign the first-to-second purchase journey for <strong>Newly acquired</strong> customers because that is where the long-run value leakage starts.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" id="experiment">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">Experiment Design</div>
+            <h3>Free Shipping Above $100</h3>
+            <p>
+              Task D in Part 1 used a pre/post proxy. For an actual product decision, this should be run as a randomized experiment.
+              The structure below keeps the design causal, focused, and measurable.
+            </p>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="note-card">
+            <h3>Recommended Design</h3>
+            <div class="experiment-grid">
+              <div class="experiment-step">
+                <small>Hypothesis</small>
+                <strong>Lift conversion and threshold crossing</strong>
+                <p>Free shipping at $100 should increase completed-order conversion and move more carts from the high-$70s and $90s into the eligible threshold.</p>
+              </div>
+              <div class="experiment-step">
+                <small>Target</small>
+                <strong>New Search-led buyers first</strong>
+                <p>Search is the largest acquisition source, while repeat within 90 days is still low. That makes it the cleanest high-scale test cohort.</p>
+              </div>
+              <div class="experiment-step">
+                <small>Primary Metric</small>
+                <strong>Completed-order conversion rate</strong>
+                <p>Track the lift in completed orders, not clicks or cart adds. That is the metric closest to incremental gross revenue.</p>
+              </div>
+              <div class="experiment-step">
+                <small>Guardrails</small>
+                <strong>Margin, returns, cancellations</strong>
+                <p>Do not ship the change unless conversion lift holds after shipping cost, return rate, and cancellation rate guardrails.</p>
+              </div>
+            </div>
+            <div class="baseline-grid">
+              <div class="baseline-tile">
+                <small>Pre-launch proxy</small>
+                <strong id="baseline-pre-orders"></strong>
+                <p id="baseline-pre-copy" class="muted"></p>
+              </div>
+              <div class="baseline-tile">
+                <small>Post-launch proxy</small>
+                <strong id="baseline-post-orders"></strong>
+                <p id="baseline-post-copy" class="muted"></p>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            <div class="plot-shell">
+              <div class="plot-short" id="bandPlot"></div>
+            </div>
+            <div class="plot-shell">
+              <div class="plot-short" id="channelPlot"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" id="definitions">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">Definitions and Alternatives</div>
+            <h3>How the Dashboard Defines the Core Metrics</h3>
+            <p>
+              These definitions intentionally mirror Part 1 so the static dashboard and the notebook outputs reconcile cleanly.
+            </p>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="definition-card">
+            <h3>Primary Definitions</h3>
+            <details open>
+              <summary>Churn</summary>
+              <p>A customer-month is churned if the user has zero completed orders in the 90 days after the last completed order in that month. Recent months are censored until they have a full 90-day observation window.</p>
+            </details>
+            <details>
+              <summary>Active, New, and Returning</summary>
+              <p>An active customer has at least one completed order in the month. A new customer places their first-ever completed order in that month. A returning customer orders in any later month after that first purchase month.</p>
+            </details>
+            <details>
+              <summary>Revenue and Conversion</summary>
+              <p>Revenue excludes returned items. The conversion view from Part 1 is a monthly proxy based on distinct purchase-event users divided by distinct department-event users, not a strict session funnel.</p>
+            </details>
+          </div>
+          <div class="definition-card">
+            <h3>Alternatives Worth Considering</h3>
+            <details open>
+              <summary>Alternative churn definitions</summary>
+              <p>For faster intervention, I would also track 30-day reorder churn, 14-day session churn, or cohort-based retention. Those are better for operational product teams than a lagging 90-day purchase definition.</p>
+            </details>
+            <details>
+              <summary>Alternative segmenting logic</summary>
+              <p>If campaign targeting is the priority, I would extend the segments with acquisition channel, country, and price sensitivity. If assortment is the priority, I would add department affinity and return behavior.</p>
+            </details>
+            <details>
+              <summary>Metrics for the shipping test</summary>
+              <p>The primary metric should be completed-order conversion. Key secondary metrics are average order value, revenue per visitor, threshold-crossing share, and second-order rate. Margin, delivery cost, returns, and cancellations are the required guardrails.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="footer-card">
+        <h3>Files and Reproducibility</h3>
+        <p>
+          All static data in this page was computed from the local parquet tables in <code>thelook_parquet_data/</code>.
+          The SQL lineage for every section lives in <code>dashboard/queries/</code>, and the narrative summary is in <code>dashboard/README.md</code>.
+        </p>
+        <ul>
+          <li>Visual logic and definitions are aligned to <code>analysis/PART_2.ipynb</code>.</li>
+          <li>The dashboard is fully static: no runtime data fetches, no backend dependencies.</li>
+          <li>Deployment target is a simple GitHub Pages publish of the <code>dashboard/</code> folder.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="./data.js"></script>
+  <script>
+    const data = window.dashboardData;
+    const summary = data.summary;
+
+    const usd0 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+    const usd1 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const pct1 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const num0 = new Intl.NumberFormat("en-US");
+    const monthFmt = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+
+    const palette = {
+      ink: "#182432",
+      slate: "#4a5f77",
+      gold: "#f0a33b",
+      teal: "#1c8c82",
+      tealSoft: "#6cc5b8",
+      coral: "#d76347",
+      navy: "#103b5b",
+      mist: "#dce6ef",
+      sand: "#f6f1e7",
+      dormant: "#c5ced8",
+      risk: "#d76347",
+      newish: "#f0a33b",
+      active: "#1c8c82",
+      champions: "#103b5b"
+    };
+
+    const segmentColors = {
+      "Dormant": palette.dormant,
+      "At risk": palette.risk,
+      "Newly acquired": palette.newish,
+      "Active repeat": palette.active,
+      "Champions": palette.champions
+    };
+
+    function isoToDate(iso) {
+      return new Date(`${iso}T00:00:00Z`);
+    }
+
+    function labelMonth(iso) {
+      return monthFmt.format(isoToDate(iso));
+    }
+
+    function applyText() {
+      document.getElementById("chip-coverage").textContent = `Coverage: Jan 2020 to ${labelMonth(summary.lastFullMonth)}`;
+      document.getElementById("chip-churn-window").textContent = `Mature churn through ${labelMonth(summary.lastMatureChurnMonth)}`;
+      document.getElementById("chip-segment-snapshot").textContent = `Segment snapshot: ${summary.snapshotDate}`;
+
+      document.getElementById("stat-revenue").textContent = usd0.format(summary.totalRevenueSince2020);
+      document.getElementById("stat-returning").textContent = `${pct1.format(summary.returningShareLatest12mAvg)}%`;
+      document.getElementById("stat-churn").textContent = `${pct1.format(summary.avgChurnSince2020)}%`;
+      document.getElementById("stat-customers").textContent = num0.format(summary.purchasingCustomersSnapshot);
+      document.getElementById("stat-correlation").textContent = summary.revenueChurnCorrelation.toFixed(3);
+      document.getElementById("stat-threshold").textContent = `${pct1.format(summary.orders75to99ShareLast12m)}%`;
+
+      document.getElementById("mix-insight-1").textContent = `Returning revenue share increased from ${pct1.format(summary.returningShare2020Avg)}% in the 2020 monthly average to ${pct1.format(summary.returningShareLatest12mAvg)}% across the latest 12 full months.`;
+      document.getElementById("mix-insight-2").textContent = `The latest full month, ${labelMonth(summary.lastFullMonth)}, still generated only ${pct1.format(summary.latestReturningShare)}% of revenue from returning customers.`;
+      document.getElementById("mix-insight-3").textContent = "Leadership should read this as a first-to-second purchase problem, not a top-of-funnel problem.";
+
+      document.getElementById("churn-insight-1").textContent = `Average 90-day churn is ${pct1.format(summary.avgChurnSince2020)}%, which is extreme even under a strict purchase-based definition.`;
+      document.getElementById("churn-insight-2").textContent = `The best mature month is ${labelMonth(summary.minChurnMonth)} at ${pct1.format(summary.minChurnSince2020)}% churn, and revenue rises when churn pressure eases.`;
+      document.getElementById("churn-insight-3").textContent = `Revenue and churn have a ${summary.revenueChurnCorrelation.toFixed(3)} correlation, which is strong evidence that retention improvement is monetization improvement.`;
+
+      document.getElementById("segment-insight-1").textContent = "Dormant customers are the majority of the purchaser base, which signals a very large one-time-buyer pool available for reactivation or lifecycle redesign.";
+      document.getElementById("segment-insight-2").textContent = "Active repeat buyers and Champions are small in count but richer on revenue per customer, so they deserve explicit protection and loyalty treatment.";
+      document.getElementById("segment-insight-3").textContent = "Newly acquired customers are large enough to matter immediately, so the first-order experience is the best leverage point for both conversion and future retention.";
+
+      const pre = data.shippingBaseline.find((row) => row.period === "Pre-launch");
+      const post = data.shippingBaseline.find((row) => row.period === "Post-launch");
+      document.getElementById("baseline-pre-orders").textContent = `${num0.format(pre.completed_orders)} orders`;
+      document.getElementById("baseline-pre-copy").textContent = `AOV ${usd1.format(pre.avg_order_value)} and ${pct1.format(pre.pct_orders_above_100 * 100)}% of orders at or above $100 in the 30-day pre window.`;
+      document.getElementById("baseline-post-orders").textContent = `${num0.format(post.completed_orders)} orders`;
+      document.getElementById("baseline-post-copy").textContent = `AOV ${usd1.format(post.avg_order_value)} and ${pct1.format(post.pct_orders_above_100 * 100)}% of orders at or above $100 in the 30-day post window.`;
+    }
+
+    function sharedLayout(title) {
+      return {
+        title: { text: title, font: { family: "Space Grotesk, sans-serif", size: 22, color: palette.ink } },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { family: "IBM Plex Sans, sans-serif", color: palette.ink, size: 13 },
+        margin: { l: 56, r: 28, t: 74, b: 48 },
+        hovermode: "x unified",
+        legend: { orientation: "h", x: 0, y: 1.12 },
+        xaxis: {
+          gridcolor: "rgba(16,59,91,0.08)",
+          tickfont: { color: palette.slate },
+          zeroline: false
+        },
+        yaxis: {
+          gridcolor: "rgba(16,59,91,0.08)",
+          tickfont: { color: palette.slate },
+          zeroline: false
+        }
+      };
+    }
+
+    function renderMix() {
+      const x = data.monthlyMix.map((row) => row.month);
+      const traces = [
+        {
+          type: "bar",
+          name: "New revenue",
+          x,
+          y: data.monthlyMix.map((row) => row.new_revenue),
+          marker: { color: palette.gold },
+          hovertemplate: "%{x|%b %Y}<br>New revenue: %{y:$,.0f}<extra></extra>"
+        },
+        {
+          type: "bar",
+          name: "Returning revenue",
+          x,
+          y: data.monthlyMix.map((row) => row.returning_revenue),
+          marker: { color: palette.teal },
+          hovertemplate: "%{x|%b %Y}<br>Returning revenue: %{y:$,.0f}<extra></extra>"
+        },
+        {
+          type: "scatter",
+          name: "Returning share",
+          mode: "lines",
+          x,
+          y: data.monthlyMix.map((row) => row.returning_share * 100),
+          yaxis: "y2",
+          line: { color: palette.navy, width: 3.5 },
+          hovertemplate: "%{x|%b %Y}<br>Returning share: %{y:.1f}%<extra></extra>"
+        }
+      ];
+
+      const layout = {
+        ...sharedLayout("Monthly revenue mix: retention is improving, but still subscale"),
+        barmode: "stack",
+        yaxis: { ...sharedLayout("").yaxis, title: "Revenue ($)", tickprefix: "$" },
+        yaxis2: {
+          overlaying: "y",
+          side: "right",
+          range: [0, 25],
+          tickfont: { color: palette.slate },
+          title: "Returning revenue share (%)"
+        }
+      };
+
+      Plotly.newPlot("mixPlot", traces, layout, { displayModeBar: false, responsive: true });
+    }
+
+    function renderChurn() {
+      const x = data.monthlyChurn.map((row) => row.month);
+      const minChurn = Math.min(...data.monthlyChurn.map((row) => row.churn_rate_90d * 100));
+      const traces = [
+        {
+          type: "bar",
+          name: "Revenue",
+          x,
+          y: data.monthlyChurn.map((row) => row.revenue),
+          marker: { color: palette.navy, opacity: 0.84 },
+          hovertemplate: "%{x|%b %Y}<br>Revenue: %{y:$,.0f}<extra></extra>"
+        },
+        {
+          type: "scatter",
+          name: "90-day churn rate",
+          mode: "lines+markers",
+          x,
+          y: data.monthlyChurn.map((row) => row.churn_rate_90d * 100),
+          yaxis: "y2",
+          line: { color: palette.coral, width: 3 },
+          marker: { color: palette.coral, size: 7 },
+          hovertemplate: "%{x|%b %Y}<br>90-day churn: %{y:.1f}%<extra></extra>"
+        }
+      ];
+
+      const layout = {
+        ...sharedLayout("Revenue rises when churn pressure eases"),
+        yaxis: { ...sharedLayout("").yaxis, title: "Revenue ($)", tickprefix: "$" },
+        yaxis2: {
+          overlaying: "y",
+          side: "right",
+          range: [Math.max(90, minChurn - 1.5), 100.5],
+          tickfont: { color: palette.slate },
+          title: "90-day churn rate (%)"
+        }
+      };
+
+      Plotly.newPlot("churnPlot", traces, layout, { displayModeBar: false, responsive: true });
+    }
+
+    function renderSegments() {
+      const labels = data.segmentSummary.map((row) => row.segment);
+      const customerShare = data.segmentSummary.map((row) => row.customer_share * 100);
+      const revenueShare = data.segmentSummary.map((row) => row.revenue_share * 100);
+      const avgOrders = data.segmentSummary.map((row) => row.avg_orders);
+      const colors = labels.map((label) => segmentColors[label]);
+
+      Plotly.newPlot("segmentSharePlot", [{
+        type: "pie",
+        labels,
+        values: customerShare,
+        hole: 0.58,
+        sort: false,
+        marker: { colors },
+        textinfo: "label+percent",
+        hovertemplate: "%{label}<br>Customer share: %{value:.1f}%<extra></extra>"
+      }], {
+        ...sharedLayout("Share of purchasing customers"),
+        showlegend: false,
+        margin: { l: 20, r: 20, t: 70, b: 20 }
+      }, { displayModeBar: false, responsive: true });
+
+      Plotly.newPlot("segmentRevenuePlot", [{
+        type: "bar",
+        orientation: "h",
+        y: labels,
+        x: revenueShare,
+        marker: { color: colors },
+        text: revenueShare.map((value) => `${value.toFixed(1)}%`),
+        textposition: "outside",
+        customdata: avgOrders,
+        hovertemplate: "%{y}<br>Revenue share: %{x:.1f}%<br>Avg orders: %{customdata:.2f}<extra></extra>"
+      }], {
+        ...sharedLayout("Share of lifetime revenue"),
+        margin: { l: 110, r: 40, t: 70, b: 48 },
+        xaxis: { ...sharedLayout("").xaxis, title: "Revenue share (%)" },
+        yaxis: { ...sharedLayout("").yaxis, categoryorder: "array", categoryarray: labels.slice().reverse() }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    function renderBands() {
+      Plotly.newPlot("bandPlot", [{
+        type: "bar",
+        x: data.orderBandSummary.map((row) => row.order_band),
+        y: data.orderBandSummary.map((row) => row.share * 100),
+        marker: {
+          color: [palette.mist, "#cfd8e2", palette.gold, palette.tealSoft, palette.teal]
+        },
+        text: data.orderBandSummary.map((row) => `${(row.share * 100).toFixed(1)}%`),
+        textposition: "outside",
+        hovertemplate: "%{x}<br>Share of last-12-month orders: %{y:.1f}%<extra></extra>"
+      }], {
+        ...sharedLayout("Last 12 full months: order value bands"),
+        margin: { l: 52, r: 24, t: 70, b: 58 },
+        yaxis: { ...sharedLayout("").yaxis, title: "Share of orders (%)" }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    function renderChannels() {
+      const rows = [...data.channelRepeat].reverse();
+      Plotly.newPlot("channelPlot", [{
+        type: "bar",
+        orientation: "h",
+        y: rows.map((row) => row.traffic_source),
+        x: rows.map((row) => row.repeat_90d * 100),
+        marker: { color: palette.coral },
+        text: rows.map((row) => `${(row.repeat_90d * 100).toFixed(1)}%`),
+        textposition: "outside",
+        hovertemplate: "%{y}<br>Repeat within 90 days: %{x:.1f}%<br>Customers: %{customdata:,}<extra></extra>",
+        customdata: rows.map((row) => row.customers)
+      }], {
+        ...sharedLayout("First-order repeat within 90 days by acquisition channel"),
+        margin: { l: 90, r: 40, t: 70, b: 48 },
+        xaxis: { ...sharedLayout("").xaxis, title: "Repeat within 90 days (%)" },
+        yaxis: { ...sharedLayout("").yaxis }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    applyText();
+    renderMix();
+    renderChurn();
+    renderSegments();
+    renderBands();
+    renderChannels();
+  </script>
+</body>
+</html>

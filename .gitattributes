@@ -1,0 +1,2 @@
+thelook_parquet_data/*.db filter=lfs diff=lfs merge=lfs -text
+thelook_parquet_data/*.parquet filter=lfs diff=lfs merge=lfs -text
