@@ -2,13 +2,13 @@
 
 This repository contains the complete solution for the Peek Product Analyst 2026 Data Challenge.
 
-- **Part 1** – SQL queries (Tasks A–D) in `PART_1.ipynb`
-- **Part 2** – Analysis & findings presented as a fully static GitHub Pages dashboard (`dashboard/index.html`)
+- **Part 1** – SQL queries (Tasks A–D) in `analysis/PART_1.ipynb`
+- **Part 2** – Analysis & findings presented as a fully static GitHub Pages dashboard at [mandr4k3.github.io/thelook_ecommerce/analysis/dashboard/index.html](https://mandr4k3.github.io/thelook_ecommerce/analysis/dashboard/index.html)
 
 ## How to Explore
 
-1. **Part 1 (SQL)**: Open `PART_1.ipynb` – all four tasks are executed with outputs.
-2. **Part 2 (Analysis & Visuals)**: View the live dashboard at `dashboard/index.html` (or deploy the `dashboard/` folder to GitHub Pages).
+1. **Part 1 (SQL)**: Open `analysis/PART_1.ipynb` – all four tasks are executed with outputs.
+2. **Part 2 (Analysis & Visuals)**: Open the [live dashboard](https://mandr4k3.github.io/thelook_ecommerce/analysis/dashboard/index.html) or review the source in `analysis/dashboard/index.html`.
 
 ## Assumptions & Date Ranges
 - All queries run on the full `bigquery-public-data.thelook_ecommerce` dataset.
@@ -29,11 +29,12 @@ This repository contains the complete solution for the Peek Product Analyst 2026
 - Cohort-based retention for leadership reporting.
 
 ## Part 2 – Visuals & Findings
-Presented via the static dashboard (`dashboard/index.html`):
+Presented via the static dashboard: [Live link](https://mandr4k3.github.io/thelook_ecommerce/analysis/dashboard/index.html)  
+Source file: `analysis/dashboard/index.html`
 
 - New vs Returning Revenue Mix by Month
 - Monthly Churn Rate vs Revenue
-- Customer Segment Split (RFM-style snapshot as of 2026-03-31)
+- Customer Groups by Size and Revenue
 - Free Shipping > $100 experiment design + proxy baseline
 
 All visuals are built directly from the outputs of Part 1 queries.
@@ -65,7 +66,7 @@ Secondary: AOV, second-order rate. Guardrails: margin, returns, cancellations.
 ## Reproducibility
 - All Part 1 SQL is fully parameterized and uses only Standard SQL.
 - Dashboard data is hardcoded from local parquet extracts (`thelook_parquet_data/`) for zero-dependency GitHub Pages deployment.
-- SQL lineage for every dashboard section is in `dashboard/queries/`.
+- SQL lineage for every dashboard section is in `analysis/dashboard/queries/`.
 
 ## Google Cloud Project ID
 If you want to rerun the raw table download in `scripts/fetch_thelook_table.py`, replace `PROJECT_ID = "gmp-demo"` with your own Google Cloud Project ID.
