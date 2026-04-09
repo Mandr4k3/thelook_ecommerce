@@ -1,66 +1,78 @@
-# thelook_ecommerce BigQuery downloader
+# thelook Ecommerce – Product Analyst Challenge Submission
 
-This repo contains a small Python CLI for pulling tables from the public BigQuery dataset:
+This repository contains the complete solution for the Peek Product Analyst 2026 Data Challenge.
 
-- `bigquery-public-data.thelook_ecommerce`
+- **Part 1** – SQL queries (Tasks A–D) in `PART_1.ipynb`
+- **Part 2** – Analysis & findings presented as a fully static GitHub Pages dashboard (`dashboard/index.html`)
 
-The Google Cloud Console URL you shared points to the dataset root, not one specific table, so the script supports both:
+## How to Explore
 
-- listing the available tables
-- downloading any chosen table to CSV or JSONL
+1. **Part 1 (SQL)**: Open `PART_1.ipynb` – all four tasks are executed with outputs.
+2. **Part 2 (Analysis & Visuals)**: View the live dashboard at `dashboard/index.html` (or deploy the `dashboard/` folder to GitHub Pages).
 
-## 1. Install dependencies
+## Assumptions & Date Ranges
+- All queries run on the full `bigquery-public-data.thelook_ecommerce` dataset.
+- Start date: `2020-01-01` (parameterized in every query).
+- Task D launch date: `2022-01-15` (as specified in the brief).
+- 90-day churn calculations are censored using the dataset’s own `MAX(created_at)` for reproducibility.
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r requirements.txt
-```
+## Definitions (Exactly as Used in Part 1)
 
-## 2. Authenticate locally
+**Active customer**: User with ≥1 completed, non-returned order in the month.  
+**New customer**: First-ever completed order occurs in that month.  
+**Returning customer**: Any completed order in a month strictly after their first purchase month.  
+**90-day churn**: A user-month is churned if the user places zero completed orders in the 90 days after their last order in that month.  
+**Monthly Conversion Rate (Task A)**: Distinct `purchase` event users ÷ distinct `department` event users (monthly proxy).
 
-Use Application Default Credentials:
+**Alternatives considered** (in dashboard):
+- 30-day reorder churn or 14-day session churn for faster signals.
+- Cohort-based retention for leadership reporting.
 
-```bash
-gcloud auth application-default login
-export GOOGLE_CLOUD_PROJECT="your-gcp-project-id"
-```
+## Part 2 – Visuals & Findings
+Presented via the static dashboard (`dashboard/index.html`):
 
-If you prefer a service account, set:
+- New vs Returning Revenue Mix by Month
+- Monthly Churn Rate vs Revenue
+- Customer Segment Split (RFM-style snapshot as of 2026-03-31)
+- Free Shipping > $100 experiment design + proxy baseline
 
-```bash
-export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/service-account.json"
-export GOOGLE_CLOUD_PROJECT="your-gcp-project-id"
-```
+All visuals are built directly from the outputs of Part 1 queries.
 
-## 3. List the dataset tables
+## AI Usage in This Challenge
+I used AI to:
+- Review and harden SQL queries (edge cases, reproducibility).
+- Structure the static dashboard narrative and experiment design.
+- Generate clear definitions and alternative metric options.
 
-```bash
-python3 scripts/fetch_thelook_table.py list-tables
-```
+**Example prompt used**:
+> “Help me turn the Task B and Task C query outputs into a concise static dashboard structure. Keep the wording professional, separate observations from recommendations, and do not invent claims beyond the data.”
 
-## 4. Download a table
+I validated every AI suggestion by running the queries myself and cross-checking row counts and definitions against the job brief.
 
-Download a safe sample first:
+## Questions Addressed (Part 2 Requirements)
 
-```bash
-python3 scripts/fetch_thelook_table.py download orders --limit 1000 --output data/orders.csv
-```
+**1. How were churn, active customer, and new vs returning defined?**  
+(See Definitions section above + full alternatives in the dashboard.)
 
-Download the full table:
+**2. Most important trend for leadership?**  
+Returning revenue share is improving (from 1.9% in 2020 to ~15% in the latest 12 months) but the business remains heavily acquisition-led. Retention is the largest untapped growth lever.
 
-```bash
-python3 scripts/fetch_thelook_table.py download orders --all --output data/orders.csv
-```
+**3. One product experiment I would run?**  
+Randomized test of **free shipping above $100**, targeted first at newly acquired Search-led customers.  
+Primary metric: completed-order conversion rate.  
+Secondary: AOV, second-order rate. Guardrails: margin, returns, cancellations.
 
-Download JSONL instead of CSV:
+## Reproducibility
+- All Part 1 SQL is fully parameterized and uses only Standard SQL.
+- Dashboard data is hardcoded from local parquet extracts (`thelook_parquet_data/`) for zero-dependency GitHub Pages deployment.
+- SQL lineage for every dashboard section is in `dashboard/queries/`.
 
-```bash
-python3 scripts/fetch_thelook_table.py download users --format jsonl --output data/users.jsonl
-```
+## Google Cloud Project ID
+If you want to rerun the raw table download in `scripts/fetch_thelook_table.py`, replace `PROJECT_ID = "gmp-demo"` with your own Google Cloud Project ID.
 
-## Notes
+Using your own Project ID also lets you run the Part 1 notebook queries against the public dataset from Python, without needing to work directly in the BigQuery UI.
 
-- `--billing-project` can be passed explicitly if you do not want to rely on `GOOGLE_CLOUD_PROJECT`.
-- By default, `download` only fetches `1000` rows so you do not accidentally pull a large table.
-- Pass `--overwrite` if the output file already exists.
+To find it in Google Cloud Console:
+- Open the project selector in the top navigation bar.
+- Choose your project and copy the value shown as **Project ID**.
+- Use the **Project ID**, not the project name or project number.

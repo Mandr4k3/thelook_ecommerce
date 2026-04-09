@@ -568,7 +568,7 @@
             <h3>Monthly Churn Rate vs Revenue</h3>
             <p>
               The churn metric is intentionally strict: a customer is churned for a month if they place no completed order in the next 90 days after their last order in that month.
-              Even with that caveat, the direction is clear: months with lower churn are the months that monetize best.
+              The main signal is still clear: churn stays around 94% on average, so retention is the biggest growth lever right now, and the best revenue months are the ones with lower churn.
             </p>
           </div>
         </div>
@@ -591,9 +591,9 @@
         <div class="section-head">
           <div>
             <div class="section-tag">Visual 3</div>
-            <h3>Customer Segment Split</h3>
+            <h3>Customer Groups by Size and Revenue</h3>
             <p>
-              I used a lightweight RFM-style segmentation at the March 31, 2026 snapshot date. The split is designed to be operationally useful: recency isolates reactivation risk, while order count and lifetime spend isolate the small high-value base worth protecting.
+              This view groups customers as of March 31, 2026 using a simple snapshot of recency, order count, and lifetime spend. The goal is to show which groups are large, which groups drive revenue, and where retention or reactivation work matters most.
             </p>
           </div>
         </div>
@@ -620,6 +620,7 @@
               <li>Protect <strong>Active repeat</strong> and <strong>Champions</strong> first. They are small in count but economically dense.</li>
               <li>Run reactivation programs on the <strong>At risk</strong> base second because the recency window is still recoverable.</li>
               <li>Redesign the first-to-second purchase journey for <strong>Newly acquired</strong> customers because that is where the long-run value leakage starts.</li>
+              <li>Add a <strong>days_since_last_order</strong> field for high-value customers and trigger alerts before they age into churn risk.</li>
             </ul>
           </div>
         </div>
@@ -708,7 +709,7 @@
             </details>
             <details>
               <summary>Revenue and Conversion</summary>
-              <p>Revenue excludes returned items. The conversion view from Part 1 is a monthly proxy based on distinct purchase-event users divided by distinct department-event users, not a strict session funnel.</p>
+              <p>Revenue excludes returned items. The conversion rate here is a monthly proxy based on distinct purchase-event users divided by distinct department-event users, not a true session funnel. Because a user can buy in one month and browse a department page in another, the rate can exceed 100% in some months, which happened in this dataset. In a real product setting, I would use <code>session_id</code> plus event sequence.</p>
             </details>
           </div>
           <div class="definition-card">
@@ -733,12 +734,12 @@
         <h3>Files and Reproducibility</h3>
         <p>
           All static data in this page was computed from the local parquet tables in <code>thelook_parquet_data/</code>.
-          The SQL lineage for every section lives in <code>dashboard/queries/</code>, and the narrative summary is in <code>dashboard/README.md</code>.
+          The SQL lineage for every section lives in <code>analysis/dashboard/queries/</code>, and the narrative summary is in <code>analysis/dashboard/README.md</code>.
         </p>
         <ul>
-          <li>Visual logic and definitions are aligned to <code>analysis/PART_2.ipynb</code>.</li>
+          <li>The dashboard logic and definitions are documented directly in this page and in the linked SQL files.</li>
           <li>The dashboard is fully static: no runtime data fetches, no backend dependencies.</li>
-          <li>Deployment target is a simple GitHub Pages publish of the <code>dashboard/</code> folder.</li>
+          <li>Deployment target is a simple GitHub Pages publish of the <code>analysis/dashboard/</code> folder.</li>
         </ul>
       </section>
     </main>
@@ -802,11 +803,11 @@
 
       document.getElementById("mix-insight-1").textContent = `Returning revenue share increased from ${pct1.format(summary.returningShare2020Avg)}% in the 2020 monthly average to ${pct1.format(summary.returningShareLatest12mAvg)}% across the latest 12 full months.`;
       document.getElementById("mix-insight-2").textContent = `The latest full month, ${labelMonth(summary.lastFullMonth)}, still generated only ${pct1.format(summary.latestReturningShare)}% of revenue from returning customers.`;
-      document.getElementById("mix-insight-3").textContent = "Leadership should read this as a first-to-second purchase problem, not a top-of-funnel problem.";
+      document.getElementById("mix-insight-3").textContent = "This should be read as a first-to-second purchase problem, not a top-of-funnel problem.";
 
-      document.getElementById("churn-insight-1").textContent = `Average 90-day churn is ${pct1.format(summary.avgChurnSince2020)}%, which is extreme even under a strict purchase-based definition.`;
-      document.getElementById("churn-insight-2").textContent = `The best mature month is ${labelMonth(summary.minChurnMonth)} at ${pct1.format(summary.minChurnSince2020)}% churn, and revenue rises when churn pressure eases.`;
-      document.getElementById("churn-insight-3").textContent = `Revenue and churn have a ${summary.revenueChurnCorrelation.toFixed(3)} correlation, which is strong evidence that retention improvement is monetization improvement.`;
+      document.getElementById("churn-insight-1").textContent = `Average 90-day churn is ${pct1.format(summary.avgChurnSince2020)}%, so the business is losing most customers within 90 days. Retention is the biggest growth lever right now.`;
+      document.getElementById("churn-insight-2").textContent = `The best mature month is ${labelMonth(summary.minChurnMonth)} at ${pct1.format(summary.minChurnSince2020)}% churn, and lower churn lines up with stronger revenue.`;
+      document.getElementById("churn-insight-3").textContent = `Revenue and churn move together in the expected direction, with a ${summary.revenueChurnCorrelation.toFixed(3)} correlation between them.`;
 
       document.getElementById("segment-insight-1").textContent = "Dormant customers are the majority of the purchaser base, which signals a very large one-time-buyer pool available for reactivation or lifecycle redesign.";
       document.getElementById("segment-insight-2").textContent = "Active repeat buyers and Champions are small in count but richer on revenue per customer, so they deserve explicit protection and loyalty treatment.";
