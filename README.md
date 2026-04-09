@@ -41,12 +41,16 @@ All visuals are built directly from the outputs of Part 1 queries.
 
 ## AI Usage in This Challenge
 I used AI to:
-- Review and harden SQL queries (edge cases, reproducibility).
-- Structure the static dashboard narrative and experiment design.
-- Generate clear definitions and alternative metric options.
+- Review and harden SQL queries for edge cases and reproducibility.
+- Create, push, and update this repository through the GitHub MCP alongside local development.
+- Accelerate the local Querybook setup, which I used as a query IDE for EDA.
+- Add a local Ollama LLM to help optimize queries during analysis.
+- Automate table downloads into parquet files after evaluating that Querybook plus scripted parquet extraction would give the fastest response.
 
-**Example prompt used**:
-> “Help me turn the Task B and Task C query outputs into a concise static dashboard structure. Keep the wording professional, separate observations from recommendations, and do not invent claims beyond the data.”
+**Example prompts used**:
+> “Write a Python script that downloads selected tables from `bigquery-public-data.thelook_ecommerce` into local parquet files. Make the project ID configurable, print progress and file sizes.”
+
+> “Help me set up Querybook locally with Docker, then connect its AI feature to a local Ollama deployment using the Gemma 4 26B A4B model so I can use it for query optimization. Keep the setup practical, local-first, and focused on speeding up SQL iteration.”
 
 I validated every AI suggestion by running the queries myself and cross-checking row counts and definitions against the job brief.
 
