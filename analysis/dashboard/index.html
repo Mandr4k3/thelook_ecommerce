@@ -1002,6 +1002,11 @@
         customdata: rows.map((row) => row.customers)
       }], {
         ...sharedLayout("First-order repeat within 90 days by acquisition channel"),
+        title: {
+          ...sharedLayout("").title,
+          text: "First-order repeat within 90 days<br>by acquisition channel",
+          font: { ...sharedLayout("").title.font, size: 18 }
+        },
         margin: { l: 90, r: 40, t: 70, b: 48 },
         xaxis: { ...sharedLayout("").xaxis, title: "Repeat within 90 days (%)" },
         yaxis: { ...sharedLayout("").yaxis }
